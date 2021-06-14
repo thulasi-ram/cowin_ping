@@ -45,3 +45,4 @@ temp/
 .bundle/
 coverage.out
 bin/
+fyne-cross/*
