@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/speaker"
+	"io/ioutil"
 	"log"
-	"os"
 	"time"
 )
 
@@ -32,13 +33,8 @@ func makeSound(ctx context.Context) {
 }
 
 func readSound() (beep.StreamSeekCloser, beep.Format) {
-
-	f, err := os.Open("alarm.mp3")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	streamer, format, err := mp3.Decode(f)
+	buf := bytes.NewBuffer(resourceAlarmMp3.Content())
+	streamer, format, err := mp3.Decode(ioutil.NopCloser(buf))
 	if err != nil {
 		log.Fatal(err)
 	}
