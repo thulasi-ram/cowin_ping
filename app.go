@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"time"
 )
 
 type App struct {
@@ -69,7 +70,14 @@ func (a *App) setupWidgets() {
 
 			go func(ctx context.Context) {
 				for p := range centersChan {
-					a.AddLog(GetFormattedDataAndMakeSound(ctx, p))
+					buf := GetFormattedDataAndMakeSound(ctx, p)
+					scanner := bufio.NewScanner(&buf)
+					a.AddLog("As on: "+time.Now().Format(time.RFC1123), &fyne.TextStyle{Italic: true})
+					for scanner.Scan() {
+						a.AddLog(scanner.Text(), &fyne.TextStyle{Monospace: true})
+					}
+					a.AddLog("", nil)
+					a.AddLog("", nil)
 				}
 			}(ctx)
 
@@ -89,20 +97,17 @@ func (a *App) setupWidgets() {
 		CancelText: "stop",
 	}
 
-	a.addDataWidget = widget.NewButton("Append", func() {
-		val := fmt.Sprintf("Item")
-		a.dataTableContainer.Add(canvas.NewText(val, color.White))
-	})
-
-	a.mainBox = container.NewVBox(
-		a.headerLabelWidget,
-		a.formWidget,
+	a.mainBox = container.NewMax(
+		container.NewVBox(
+			a.headerLabelWidget,
+			a.formWidget,
+		),
 	)
 }
 
 func (a *App) Run() {
 	a.window.SetContent(a.mainBox)
-	a.window.Resize(fyne.NewSize(500, 500))
+	a.window.Resize(fyne.NewSize(500, 600))
 	a.window.ShowAndRun()
 }
 
@@ -117,27 +122,37 @@ func (a *App) ToSearchRequest() *SearchRequest {
 }
 
 func (a *App) newChangingRunBox() *fyne.Container {
-	paddingTopContainer := container.NewGridWrap(fyne.Size{
+	paddingTopContainer1 := container.NewGridWrap(fyne.Size{
+		Width:  500,
+		Height: 200,
+	})
+	paddingTopContainer2 := container.NewGridWrap(fyne.Size{
 		Width:  500,
 		Height: 100,
 	})
 	a.dataTableContainer = container.NewVBox()
-	return container.NewBorder(nil, nil, nil, nil,
+
+	resizedDTC := container.NewVScroll(a.dataTableContainer)
+
+	return container.NewBorder(
+		paddingTopContainer1, nil, nil, nil,
 		container.NewVBox(
 			widget.NewLabel("Running For :"+a.pincodeWidget.Text),
 			widget.NewProgressBarInfinite(),
 		),
-		container.NewBorder(paddingTopContainer, nil, nil, nil,
-			container.NewVScroll(a.dataTableContainer),
-		))
+		container.NewMax(
+			container.NewBorder(
+				paddingTopContainer2, nil, nil, nil,
+				resizedDTC,
+			),
+		),
+	)
 }
 
-func (a *App) AddLog(message string) {
-	a.dataTableContainer.Add(canvas.NewText(message, color.White))
-}
-
-func (a *App) AddLogs(messages []string) {
-	for _, m := range messages {
-		a.AddLog(m)
+func (a *App) AddLog(message string, textStyle *fyne.TextStyle) {
+	t := canvas.NewText(message, color.White)
+	if textStyle != nil {
+		t.TextStyle = *textStyle
 	}
+	a.dataTableContainer.Add(t)
 }

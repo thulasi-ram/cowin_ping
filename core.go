@@ -77,7 +77,7 @@ func makeRequest(pinCode string, date string) VaccineCenters {
 }
 
 func printData(res VaccineCenters, writer io.Writer) {
-	w := tabwriter.NewWriter(writer, 1, 1, 1, ' ', 0)
+	w := tabwriter.NewWriter(writer, 8, 8, 3, ' ', 0)
 	_, _ = fmt.Fprintf(w, PrintDataFormat, "Name", "Fee", "Vaccine", "Available", "Comments")
 	for _, c := range res {
 		_, _ = fmt.Fprintf(w, PrintDataFormat, c.Name, c.Fee, c.Vaccine, c.AvailableCapacity, c.Comments())
@@ -116,7 +116,7 @@ func PeriodicPushData(ctx context.Context, r *SearchRequest, centers chan Vaccin
 	}
 }
 
-func GetFormattedDataAndMakeSound(ctx context.Context, centers VaccineCenters) (message string) {
+func GetFormattedDataAndMakeSound(ctx context.Context, centers VaccineCenters) (message bytes.Buffer) {
 	var b bytes.Buffer
 	printData(centers, &b)
 	if len(centers) > 0 {
@@ -124,5 +124,5 @@ func GetFormattedDataAndMakeSound(ctx context.Context, centers VaccineCenters) (
 			makeSound(ctx)
 		}(ctx)
 	}
-	return b.String()
+	return b
 }
