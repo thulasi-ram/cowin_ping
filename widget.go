@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fyne.io/fyne/v2/widget"
 	"strconv"
+	"time"
 )
 
-type FormItems []*widget.FormItem
-
 func PincodeWidget() *widget.Entry {
-	pinCodeValidator := func(p string) error {
+	validator := func(p string) error {
 		if p == "" {
 			return errors.New("pincode cannot be empty")
 		}
@@ -22,13 +21,26 @@ func PincodeWidget() *widget.Entry {
 
 		return nil
 	}
-	pinCodeInput := widget.NewEntry()
-	pinCodeInput.Validator = pinCodeValidator
-	return pinCodeInput
+	input := widget.NewEntry()
+	input.Validator = validator
+	return input
 }
 
 func DateWidget() *widget.Entry {
-	dateInput := widget.NewEntry()
-	dateInput.SetPlaceHolder("DD-MM-YYYY")
-	return dateInput
+
+	validator := func(p string) error {
+		if p == "" {
+			return errors.New("date cannot be empty")
+		}
+		_, err := time.Parse("02-01-2006", p)
+		if err != nil {
+			return errors.New("date should be of format dd-mmm-yyyy")
+		}
+
+		return nil
+	}
+	input := widget.NewEntry()
+	input.SetPlaceHolder("DD-MM-YYYY")
+	input.Validator = validator
+	return input
 }

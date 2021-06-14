@@ -33,14 +33,15 @@ func (v *VaccineCenter) Comments() string {
 }
 
 type AgeGroup struct {
-	Min int
-	Max int
+	Min  int
+	Max  int
+	Text string
 }
 
 var (
 	//AgeGroup18Minus = AgeGroup{0, 17}
-	AgeGroup18Plus = AgeGroup{18, 45}
-	AgeGroup45Plus = AgeGroup{45, 200}
+	AgeGroup18Plus = AgeGroup{18, 45, "18+ Group"}
+	AgeGroup45Plus = AgeGroup{45, 200, "45+ Group"}
 )
 
 type SearchRequest struct {
