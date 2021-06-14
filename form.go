@@ -14,8 +14,6 @@ type CowinForm struct {
 	showOnlyAvailableWidget *widget.Check
 	isSecondDoseWidget      *widget.Check
 	ageGoupRadioWidget      *widget.RadioGroup
-
-	//form *widget.Form
 }
 
 func NewCowinForm() *CowinForm {
